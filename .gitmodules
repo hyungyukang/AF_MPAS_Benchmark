@@ -1,0 +1,9 @@
+[submodule "external/MPAS-Model"]
+	path = external/MPAS-Model
+	url = git@github.com:MPAS-Dev/MPAS-Model.git
+[submodule "external/ParallelIO"]
+	path = external/ParallelIO
+	url = git@github.com:NCAR/ParallelIO.git
+[submodule "external/CMake_Fortran_utils"]
+	path = external/CMake_Fortran_utils
+	url = git@github.com:CESM-Development/CMake_Fortran_utils.git
