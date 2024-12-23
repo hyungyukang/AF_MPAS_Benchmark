@@ -54,17 +54,21 @@ set(PIO_PREFIX "${CMAKE_BINARY_DIR}/PIO_build/install")
 if(${CMAKE_C_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_C_COMPILER_ID} STREQUAL "CLANG")
   set(CFLAGS "-O3 -h noacc")
   set(CXXFLAGS "-O3 -h noacc")
-  set(FFLAGS "-O3 -h byteswapio -ef -f free -h noacc -em -M1077 -hipa0 -hzero")
+  set(FFLAGS_PIO  "-O3 -h byteswapio -ef -f free -h noacc -em -M1077 -hipa0 -hzero")
+  set(FFLAGS_MPAS "-O3 -h byteswapio -ef -f free -h noacc -em -M1077 -hipa0 -hzero -e w -s real64")
 elseif(${CMAKE_C_COMPILER_ID} STREQUAL "Gnu" OR ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
   set(CFLAGS "-O3 -m64")
   set(CXXFLAGS "-O3 -m64")
-  set(FFLAGS "-O3 -m64 -ffree-line-length-none -fconvert=big-endian -ffree-form")
+  set(FFLAGS_PIO  "-O3 -m64 -ffree-line-length-none -fconvert=big-endian -ffree-form")
+  set(FFLAGS_MPAS "-O3 -m64 -ffree-line-length-none -fconvert=big-endian -ffree-form -fdefault-real-8 -fdefault-double-8")
 else()
   set(CFLAGS " ")
   set(CXXFLAGS " ")
-  set(FFLAGS " ")
+  set(FFLAGS_PIO " ")
+  set(FFLAGS_MPAS " ")
 endif()
-message(STATUS "***** Fortran flags used for this compilation: ${FFLAGS}")
+message(STATUS "***** Fortran flags used for PIO  compilation: ${FFLAGS_PIO}")
+message(STATUS "***** Fortran flags used for MPAS compilation: ${FFLAGS_MPAS}")
 
 
 ###################################################
@@ -80,7 +84,7 @@ add_custom_target(PIO_BUILD ALL
                           -DPIO_ENABLE_TIMING=OFF
                           -DCMAKE_C_FLAGS=${CFLAGS}
                           -DCMAKE_CXX_FLAGS=${CXXFLAGS}
-                          -DCMAKE_Fortran_FLAGS=${FFLAGS}
+                          -DCMAKE_Fortran_FLAGS=${FFLAGS_PIO}
   COMMAND ${CMAKE_COMMAND} --build ${PIO_BUILD_DIR}
   COMMAND cd ${PIO_BUILD_DIR} && make install
 )
@@ -95,7 +99,7 @@ add_custom_target(MPAS_BUILD ALL
                            -DPIO_PREFIX=${PIO_PREFIX}
                            -DCMAKE_C_FLAGS=${CFLAGS}
                            -DCMAKE_CXX_FLAGS=${CXXFLAGS}
-                           -DCMAKE_Fortran_FLAGS=${FFLAGS}
+                           -DCMAKE_Fortran_FLAGS=${FFLAGS_MPAS}
                           #-DNetCDF_PATH=${NetCDF_PATH}
                           #-DFETCHCONTENT_SOURCE_DIR_MPAS_DATA=${MPAS_DIR}/src/core_atmosphere
                           #-DFETCHCONTENT_UPDATES_DISCONNECTED=ON
