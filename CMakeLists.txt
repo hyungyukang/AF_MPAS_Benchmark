@@ -49,6 +49,25 @@ set(PIO_PREFIX "${CMAKE_BINARY_DIR}/PIO_build/install")
 
 
 ###################################################
+# Compiler flags - User can modify
+###################################################
+if(${CMAKE_C_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_C_COMPILER_ID} STREQUAL "CLANG")
+  set(CFLAGS "-O3 -h noacc")
+  set(CXXFLAGS "-O3 -h noacc")
+  set(FFLAGS "-O3 -h byteswapio -ef -f free -h noacc -em -M1077 -hipa0 -hzero")
+elseif(${CMAKE_C_COMPILER_ID} STREQUAL "Gnu" OR ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+  set(CFLAGS "-O3 -m64")
+  set(CXXFLAGS "-O3 -m64")
+  set(FFLAGS "-O3 -m64 -ffree-line-length-none -fconvert=big-endian -ffree-form")
+else()
+  set(CFLAGS " ")
+  set(CXXFLAGS " ")
+  set(FFLAGS " ")
+endif()
+message(STATUS "***** Fortran flags used for this compilation: ${FFLAGS}")
+
+
+###################################################
 # Add custom target for building PIO with arguments
 ###################################################
 add_custom_target(PIO_BUILD ALL
@@ -59,6 +78,9 @@ add_custom_target(PIO_BUILD ALL
                           -DUSER_CMAKE_MODULE_PATH=${USER_CMAKE_MODULE_PATH}
                           -DGENF90_PATH=${GENF90_PATH}
                           -DPIO_ENABLE_TIMING=OFF
+                          -DCMAKE_C_FLAGS=${CFLAGS}
+                          -DCMAKE_CXX_FLAGS=${CXXFLAGS}
+                          -DCMAKE_Fortran_FLAGS=${FFLAGS}
   COMMAND ${CMAKE_COMMAND} --build ${PIO_BUILD_DIR}
   COMMAND cd ${PIO_BUILD_DIR} && make install
 )
@@ -71,6 +93,9 @@ set(MPAS_BUILD_DIR "${CMAKE_BINARY_DIR}/MPAS_build")
 add_custom_target(MPAS_BUILD ALL
   COMMAND ${CMAKE_COMMAND} -S ${MPAS_DIR} -B ${MPAS_BUILD_DIR}
                            -DPIO_PREFIX=${PIO_PREFIX}
+                           -DCMAKE_C_FLAGS=${CFLAGS}
+                           -DCMAKE_CXX_FLAGS=${CXXFLAGS}
+                           -DCMAKE_Fortran_FLAGS=${FFLAGS}
                           #-DNetCDF_PATH=${NetCDF_PATH}
                           #-DFETCHCONTENT_SOURCE_DIR_MPAS_DATA=${MPAS_DIR}/src/core_atmosphere
                           #-DFETCHCONTENT_UPDATES_DISCONNECTED=ON
@@ -120,7 +145,7 @@ endif()
 # Add post-build message
 ########################
 message(STATUS "***** Configuration completed: *****")
-message(STATUS "      - Build ParallelIO & MPAS-Model with 'cmake --build . '")
+message(STATUS "      - Build ParallelIO & MPAS-Model & Test runs with 'cmake --build . '")
 message(STATUS "      ")
 message(STATUS "      - If you want to build separately,")
 message(STATUS "        1) Build ParallelIO first with 'cmake --build . --target PIO_BUILD'")
