@@ -14,19 +14,20 @@
 
 ### Summary of process
 1. Loading required modules
-2. Compiling ParallelIO
-3. Compiling MPAS-Atmosphere
-4. Downloading input files (>20GB)
+2. Downloading input files (~23GB)
+3. Compiling ParallelIO
+4. Compiling MPAS-Atmosphere
 5. Configuring and running test simulations
    - Obtaning the model runtime
 6. Configuring and executing output verifications
    - Evaluating the error norm
 
-## Quick start
+## Instructions
 
 ### 1. Loading required modules
 The exact commands may vary depending on the machine configuration.
 ```
+module load cray-hdf5-parallel
 module load cray-netcdf-hdf5parallel
 module load cray-parallel-netcdf
 ```
@@ -36,14 +37,25 @@ git clone git@github.com:hyungyukang/AF_MPAS_Benchmark.git
 cd AF_MPAS_Benchmark
 git submodule update --init --recursive
 ```
-### 3. Compiling ParallelIO and MPAS-Atmosphere and configuring test runs
+### 3. Downloading input & verification files (~23GB)
+```
+cd AF_MPAS_Benchmark/
+wget -O mpas_model_inputs.tar.xz https://www.dropbox.com/scl/fi/oqc6wubvplje52iiivzug/mpas_model_inputs.tar.gz?rlkey=vg7naqooopcrq8vm6qo2pkyy0\&st=tt363ciq\&dl=1
+
+# Decompress option 1) Using 'tar', but this process may take a long time.
+tar -xf mpas_model_inputs.tar.gz
+
+# Decompress option 2) If the system has 'pigz', this command can accelerate the decompression process.
+tar -I pigz -xf mpas_model_inputs.tar.gz
+```
+### 4. Compiling ParallelIO and MPAS-Atmosphere and configuring test runs
 ```
 mkdir build
 cd build
 cmake ../
 cmake --build .
 ```
-#### 3.1. Optional: Compiling components separately
+#### 4.1. Optional: Compiling components separately
 ```
 mkdir build
 cmake ../
@@ -56,13 +68,6 @@ cmake --build . --target MPAS_BUILD
 
 # Setting test runs
 cmake --build . --target TEST_BUILD
-```
-### 4. Downloading input & verification files (~23GB)
-```
-cd AF_MPAS_Benchmark/
-wget -O mpas_model_inputs.tar.xz https://www.dropbox.com/scl/fi/oqc6wubvplje52iiivzug/mpas_model_inputs.tar.gz?rlkey=vg7naqooopcrq8vm6qo2pkyy0\&st=tt363ciq\&dl=1
-# Decompress - this process may take a long time.
-tar -xJf mpas_model_inputs.tar.xz
 ```
 ### 5. Running simualtions
 ```
@@ -84,6 +89,10 @@ string=`sed -n '/time integration/p' log.atmosphere.0000.out` && read -ra arr <<
 ```
 This command will return the total runtime in seconds, excluding I/O runtime.
 
+If the model is run using more than 10,000 cores, logs are written in `log.atmosphere.00000.out`:
+```
+string=`sed -n '/time integration/p' log.atmosphere.00000.out` && read -ra arr <<< "$string" && echo ${arr[3]}
+```
 
 ### 6. Verification
 Digits can be different for each machine and compiler. To ensure least accuracy, we provide a verification set that compares model outputs of the machine with that of Air Force HPC11 machine. The verification code computes L2 error norm of theta (three-dimensional potential temperature) at 6 fourcase hour. The acceptable error range should be less than 1.0E-5.
