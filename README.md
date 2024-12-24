@@ -40,9 +40,9 @@ git submodule update --init --recursive
 ### 3. Downloading input & verification files (~23GB)
 ```
 cd AF_MPAS_Benchmark/
-wget -O mpas_model_inputs.tar.xz https://www.dropbox.com/scl/fi/oqc6wubvplje52iiivzug/mpas_model_inputs.tar.gz?rlkey=vg7naqooopcrq8vm6qo2pkyy0\&st=tt363ciq\&dl=1
+wget -O mpas_model_inputs.tar.gz https://www.dropbox.com/scl/fi/1y95sinp3ua4uq235qws7/mpas_model_inputs.tar.gz?rlkey=8nd0opq9y8zmvrzflgt5cwt1a\&st=2phnaoit\&dl=1
 
-# Decompress option 1) Using 'tar', but this process may take a long time.
+# Decompress option 1) Using 'tar', but this process may take a longer time.
 tar -xf mpas_model_inputs.tar.gz
 
 # Decompress option 2) If the system has 'pigz', this command can accelerate the decompression process.
@@ -81,6 +81,7 @@ After successful completion of the simulation (6 hours of model time integration
 ```
 grep -e 'Finished running' log.atmosphere.0000.out
 ```
+Nothing will be printed if the model is not successfully completed.
 #### 5.1. Obtaining the model runtime
 Execute the following command after the simulation has completed:
 ```
