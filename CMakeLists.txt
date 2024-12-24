@@ -52,20 +52,35 @@ set(PIO_PREFIX "${CMAKE_BINARY_DIR}/PIO_build/install")
 # Compiler flags - User can modify
 ###################################################
 if(${CMAKE_C_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_C_COMPILER_ID} STREQUAL "CLANG")
-  set(CFLAGS "-O3 -h noacc")
-  set(CXXFLAGS "-O3 -h noacc")
-  set(FFLAGS_PIO  "-O3 -h byteswapio -ef -f free -h noacc -em -M1077 -hipa0 -hzero")
-  set(FFLAGS_MPAS "-O3 -h byteswapio -ef -f free -h noacc -em -M1077 -hipa0 -hzero -e w -s real64")
+  set(CFLAGS "-Ofast")
+  set(CXXFLAGS "-Ofast")
+  set(FFLAGS_PIO  "-Ofast -ffree")
+  set(FFLAGS_MPAS "-Ofast -ffree -sreal64")
+  set(LDFLAGS "-Ofast -hbyteswapio")
+
+  # Delete some unecessary lines in MPAS-Model/src/framework/mpas_forcing.F
+  #   to avoid a compiling error when using Cray-Clang
+  execute_process(COMMAND cp ${MPAS_DIR}/src/framework/mpas_forcing.F ${MPAS_DIR}/src/framework/mpas_forcing.F_backup)
+  execute_process(COMMAND sh -c "sed -i '661,667d' ${MPAS_DIR}/src/framework/mpas_forcing.F")
+
 elseif(${CMAKE_C_COMPILER_ID} STREQUAL "Gnu" OR ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
   set(CFLAGS "-O3 -m64")
   set(CXXFLAGS "-O3 -m64")
   set(FFLAGS_PIO  "-O3 -m64 -ffree-line-length-none -fconvert=big-endian -ffree-form")
   set(FFLAGS_MPAS "-O3 -m64 -ffree-line-length-none -fconvert=big-endian -ffree-form -fdefault-real-8 -fdefault-double-8")
+  set(LDFLAGS "-O3 -m64")
+elseif(${CMAKE_C_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_C_COMPILER_ID} STREQUAL "INTEL")
+  set(CFLAGS "-O3")
+  set(CXXFLAGS "-O3")
+  set(FFLAGS_PIO  "-O3 -convert big_endian -free -align array64byte")
+  set(FFLAGS_MPAS "-O3 -convert big_endian -free -align array64byte -real-size 64")
+  set(LDFLAGS "-O3")
 else()
   set(CFLAGS " ")
   set(CXXFLAGS " ")
   set(FFLAGS_PIO " ")
   set(FFLAGS_MPAS " ")
+  set(LDFLAGS " ")
 endif()
 message(STATUS "***** Fortran flags used for PIO  compilation: ${FFLAGS_PIO}")
 message(STATUS "***** Fortran flags used for MPAS compilation: ${FFLAGS_MPAS}")
@@ -100,6 +115,7 @@ add_custom_target(MPAS_BUILD ALL
                            -DCMAKE_C_FLAGS=${CFLAGS}
                            -DCMAKE_CXX_FLAGS=${CXXFLAGS}
                            -DCMAKE_Fortran_FLAGS=${FFLAGS_MPAS}
+                           -DCMAKE_EXE_LINKER_FLAGS=${LDFLAGS}
                           #-DNetCDF_PATH=${NetCDF_PATH}
                           #-DFETCHCONTENT_SOURCE_DIR_MPAS_DATA=${MPAS_DIR}/src/core_atmosphere
                           #-DFETCHCONTENT_UPDATES_DISCONNECTED=ON
