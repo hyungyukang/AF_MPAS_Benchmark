@@ -54,13 +54,17 @@ set(PIO_PREFIX "${CMAKE_BINARY_DIR}/PIO_build/install")
 if(${CMAKE_C_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_C_COMPILER_ID} STREQUAL "CLANG")
   set(CFLAGS "-Ofast")
   set(CXXFLAGS "-Ofast")
-  set(FFLAGS_PIO  "-Ofast -ffree")
-  set(FFLAGS_MPAS "-Ofast -ffree -sreal64")
-  set(LDFLAGS "-Ofast -hbyteswapio")
+  set(FFLAGS_PIO  "-Ofast -ffree -hbyteswapio ")
+  set(FFLAGS_MPAS "-Ofast -ffree -hbyteswapio -sreal64")
+  set(LDFLAGS "-Ofast")
 
   # Delete some unecessary lines in MPAS-Model/src/framework/mpas_forcing.F
   #   to avoid a compiling error when using Cray-Clang
-  execute_process(COMMAND cp ${MPAS_DIR}/src/framework/mpas_forcing.F ${MPAS_DIR}/src/framework/mpas_forcing.F_backup)
+  if (EXISTS ${MPAS_DIR}/src/framework/mpas_forcing.F_backup)
+     execute_process(COMMAND cp ${MPAS_DIR}/src/framework/mpas_forcing.F_backup ${MPAS_DIR}/src/framework/mpas_forcing.F)
+  else()
+     execute_process(COMMAND cp ${MPAS_DIR}/src/framework/mpas_forcing.F ${MPAS_DIR}/src/framework/mpas_forcing.F_backup)
+  endif()
   execute_process(COMMAND sh -c "sed -i '661,667d' ${MPAS_DIR}/src/framework/mpas_forcing.F")
 
 elseif(${CMAKE_C_COMPILER_ID} STREQUAL "Gnu" OR ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
