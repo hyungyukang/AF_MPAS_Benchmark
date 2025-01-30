@@ -1,3 +1,9 @@
+!===============================================================================
+! A fortran program to verify the correctness of the simulations
+!
+! - Reference data : Theta at 48 hours simulated on HPC11 with the GNU compiler
+!===============================================================================
+
 program read_theta
       use netcdf
       implicit none
@@ -17,7 +23,7 @@ program read_theta
       !------------------------------------------------------
 
       ! Open the NetCDF file
-      retval = nf90_open('verif_HPC11_GNU_VR20km-4km_N05_D500_theta_f06h.nc', nf90_nowrite, ncid)
+      retval = nf90_open('verif_HPC11_GNU_VR20km-4km_N01_D700_theta_f48h.nc', nf90_nowrite, ncid)
       if (retval /= nf90_noerr) then
           print *, 'Error: unable to open file.'
           stop
@@ -106,7 +112,7 @@ program read_theta
       ! Computing L2 error norm at the last prediction time -
       !------------------------------------------------------
 
-      n = nt
+      n = nt ! Last time frame. Here nt equals 2.
 
       sum1 = 0.d0
       sum2 = 0.d0
@@ -119,7 +125,7 @@ program read_theta
 
       l2_error_norm = dsqrt(sum1/sum2)
 
-      print*, 'L2 error norm (Test vs Ref) of theta at 06 h =', l2_error_norm
+      print*, 'L2 error norm (Test vs Ref) of theta at 48 h =', l2_error_norm
 
 end program read_theta
 

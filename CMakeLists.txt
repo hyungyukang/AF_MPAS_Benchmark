@@ -121,8 +121,8 @@ add_custom_target(MPAS_BUILD ALL
                            -DCMAKE_Fortran_FLAGS=${FFLAGS_MPAS}
                            -DCMAKE_EXE_LINKER_FLAGS=${LDFLAGS}
                           #-DNetCDF_PATH=${NetCDF_PATH}
-                          #-DFETCHCONTENT_SOURCE_DIR_MPAS_DATA=${MPAS_DIR}/src/core_atmosphere
-                          #-DFETCHCONTENT_UPDATES_DISCONNECTED=ON
+                           #-DFETCHCONTENT_SOURCE_DIR_MPAS_DATA=${MPAS_DIR}/src/core_atmosphere
+                           #-DFETCHCONTENT_UPDATES_DISCONNECTED=ON
   COMMAND ${CMAKE_COMMAND} --build ${MPAS_BUILD_DIR}
 )
 add_dependencies(MPAS_BUILD PIO_BUILD)
@@ -144,23 +144,24 @@ add_custom_target(TEST_BUILD ALL
 add_dependencies(TEST_BUILD MPAS_BUILD)
 
 ######################################################
-# Add custom target for building VERIFY with arguments
+# Add custom target for building POST with arguments
 ######################################################
-set(VERIFY_BUILD_DIR "${CMAKE_BINARY_DIR}/verifications")
-if (EXISTS "${TEST_BUILD_DIR}/VR20km-4km_N05_D500/outputs/history.2021-08-27_00.00.00.nc")
-   add_custom_target(VERIFY_BUILD
-     COMMAND mkdir -p ${VERIFY_BUILD_DIR}
+set(POST_BUILD_DIR "${CMAKE_BINARY_DIR}/postprocess")
+if (EXISTS "${TEST_BUILD_DIR}/VR20km-4km_N01_D700/outputs/history.2021-08-27_00.00.00.nc")
+   add_custom_target(POST_BUILD
+     COMMAND mkdir -p ${POST_BUILD_DIR}
      COMMAND ${CMAKE_Fortran_COMPILER}
-             -o  ${VERIFY_BUILD_DIR}/verify.exe
-             -O2 ${CMAKE_SOURCE_DIR}/verifications/verify.f90 -lnetcdf
-     COMMAND ln -fs ${TEST_BUILD_DIR}/VR20km-4km_N05_D500/outputs/history.2021-08-27_00.00.00.nc ${VERIFY_BUILD_DIR}
-     COMMAND ln -fs ${CMAKE_SOURCE_DIR}/mpas_model_inputs/verif_HPC11_GNU_VR20km-4km_N05_D500_theta_f06h.nc ${VERIFY_BUILD_DIR}
+             -o  ${POST_BUILD_DIR}/verify.exe
+             -O2 ${CMAKE_SOURCE_DIR}/postprocess/verify.f90 -lnetcdf
+     COMMAND ln -fs ${TEST_BUILD_DIR}/VR20km-4km_N01_D700/outputs/history.2021-08-27_00.00.00.nc ${POST_BUILD_DIR}
+     COMMAND ln -fs ${CMAKE_SOURCE_DIR}/mpas_model_inputs/verif_HPC11_GNU_VR20km-4km_N01_D700_theta_f48h.nc ${POST_BUILD_DIR}
+     COMMAND cp ${CMAKE_SOURCE_DIR}/postprocess/estimate.py ${POST_BUILD_DIR}
    )
 else()
-   add_custom_target(VERIFY_BUILD
+   add_custom_target(POST_BUILD
      COMMAND ""
-     COMMENT "***** ERROR: MPAS-A output '${TEST_BUILD_DIR}/VR20km-4km_N05_D500/outputs/history.2021-08-27_00.00.00.nc' does not exist.
-       *****        Check the model run status in '${TEST_BUILD_DIR}/VR20km-4km_N05_D500/log.atmosphere.0000.out' "
+     COMMENT "***** ERROR: MPAS-A output '${TEST_BUILD_DIR}/VR20km-4km_N01_D700/outputs/history.2021-08-27_00.00.00.nc' does not exist.
+       *****        Check the model run status in '${TEST_BUILD_DIR}/VR20km-4km_N01_D700/log.atmosphere.0000.out' "
    )
 endif()
 
@@ -175,4 +176,4 @@ message(STATUS "      - If you want to build separately,")
 message(STATUS "        1) Build ParallelIO first with 'cmake --build . --target PIO_BUILD'")
 message(STATUS "        2) Build MPAS-Model with       'cmake --build . --target MPAS_BUILD'")
 message(STATUS "        3) Set test runs with          'cmake --build . --target TEST_BUILD'")
-message(STATUS "        4) Build verification with     'cmake --build . --target VERIFY_BUILD'")
+message(STATUS "        4) Build postprocess with      'cmake --build . --target POST_BUILD'")

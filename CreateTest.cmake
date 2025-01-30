@@ -31,7 +31,7 @@ endif()
 # 2) Create test runs
 
 set(TEST_QU_DIR ${TEST_BUILD_DIR}/QU20km)
-set(TEST_VR_DIR ${TEST_BUILD_DIR}/VR20km-4km_N05_D500)
+set(TEST_VR_DIR ${TEST_BUILD_DIR}/VR20km-4km_N01_D700)
 
 if(EXISTS ${MPAS_BUILD_DIR}/bin/mpas_atmosphere)
   message("***** Setting up test runs *****")
@@ -57,10 +57,10 @@ if(EXISTS ${MPAS_BUILD_DIR}/bin/mpas_atmosphere)
   execute_process( COMMAND cp ${SOURCE_DIR}/mpas_model_inputs/namelist.atmosphere_QU20km ${TEST_QU_DIR}/namelist.atmosphere )
   execute_process( COMMAND cp ${SOURCE_DIR}/mpas_model_inputs/streams.atmosphere_QU20km ${TEST_QU_DIR}/streams.atmosphere )
 
-  # Link the initial condition file and copy namelist and stream files : VR20km-4km_N05_D500
-  execute_process( COMMAND ln -fs ${SOURCE_DIR}/mpas_model_inputs/init_2021082700_era5_VR20km-4km_N05_D500.nc ${TEST_VR_DIR}/ )
-  execute_process( COMMAND cp ${SOURCE_DIR}/mpas_model_inputs/namelist.atmosphere_VR20km-4km_N05_D500 ${TEST_VR_DIR}/namelist.atmosphere )
-  execute_process( COMMAND cp ${SOURCE_DIR}/mpas_model_inputs/streams.atmosphere_VR20km-4km_N05_D500 ${TEST_VR_DIR}/streams.atmosphere )
+  # Link the initial condition file and copy namelist and stream files : VR20km-4km_N01_D700
+  execute_process( COMMAND ln -fs ${SOURCE_DIR}/mpas_model_inputs/init_2021082700_era5_VR20km-4km_N01_D700.nc ${TEST_VR_DIR}/ )
+  execute_process( COMMAND cp ${SOURCE_DIR}/mpas_model_inputs/namelist.atmosphere_VR20km-4km_N01_D700 ${TEST_VR_DIR}/namelist.atmosphere )
+  execute_process( COMMAND cp ${SOURCE_DIR}/mpas_model_inputs/streams.atmosphere_VR20km-4km_N01_D700 ${TEST_VR_DIR}/streams.atmosphere )
 
 else()
   message("***** MPAS-A build is incompleted. Check MPAS-A build. *****")
