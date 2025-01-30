@@ -100,7 +100,7 @@ For simulations utilizing more than 10,000 cores, the log file name is `log.atmo
 
 ### 6. Estimation of runtime & Verification
 
-#### 6.1. Estimating runtime
+#### 6.1. Estimating #nodes requirements
 After obtatining the runtime for both test cases, the number of nodes (cores) required for an incresing number of windows (i.e., regionally refined regions) can be estimated under a linear scaling assumption.
 ```
 cd build/
