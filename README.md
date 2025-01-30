@@ -18,9 +18,7 @@
 3. Compiling ParallelIO
 4. Compiling MPAS-Atmosphere
 5. Configuring and running test simulations
-   - Obtaning the model runtime
 6. Configuring and executing output verifications
-   - Evaluating the error norm
 
 ## Instructions
 
@@ -70,27 +68,27 @@ cmake --build . --target MPAS_BUILD
 cmake --build . --target TEST_BUILD
 ```
 ### 5. Running simualtions
-Two simulations are required to scale the runtime with increasing the number of windows.
+Two test cases must be executed to assess the runtime scaling with an increasing number of regional refinement windows.
 #### 5.1. Running `VR20km-1km_N01_D700` test case
-This simulation is required to complete within 40 minutes. The number of nodes and cores should be adjusted. It is recommended to start with 50 nodes.
+This simulation must complete within 40 minutes. The number of nodes and cores should be adjusted accordingly. A starting point of 50 nodes is recommended.
 ```
 cd build/test_runs/VR20km-4km_N01_D700
 
-# 1) Use your job script or the provided example scripts in job_scripts/ (executable is 'mpas_atmosphere'.)
-# 2) Submit a job (e.g., on a Slurm system):
+# 1) Use your job script or the example scripts in 'job_scripts/' (executable: 'mpas_atmosphere'.)
+# 2) Submit the job (e.g., on a Slurm system):
 sbatch job.sh
 ```
-After successful completion of the simulation (48 hours of model time integration), the output log file `log.atmosphere.0000.out` will contain the message `Finished running the atmosphere core`:
+Upon successful completion of the simulation (48 hours of model time integration), the output log file `log.atmosphere.0000.out` should contain the message `Finished running the atmosphere core`:
 ```
 grep -e 'Finished running' log.atmosphere.0000.out
 ```
-Nothing will be printed if the model is not successfully completed. In this case, open `log.atmosphere.0000.out` or a job log file to check issues.
+If no output is returned, the model has not completed successfully. In this case, inspect `log.atmosphere.0000.out` or the job log file for error diagnostics.
 
 #### 5.2. Running `QU20km` test case
-Running process is the same as 5.1 except that the test directory is `build/test_runs/QU20km`. Keep in mind using the same number of nodes (cores) as in `VR20km-4km_N01_D700`.
+The execution procedure is identical to that of Section 5.1, except that the test directory is `build/test_runs/QU20km`. The number of nodes and cores should be the same as those used for `VR20km-4km_N01_D700`.
 
 #### 5.3. Obtaining the model runtime
-Execute the following command after the simulation has completed:
+After completing the simulations, execute the following command to retrieve the total runtime in seconds (excluding I/O operations):
 ```
 cd build/test_runs/VR20km-4km_N01_D700
 string=`sed -n '/time integration/p' log.atmosphere.0000.out` && read -ra arr <<< "$string" && echo ${arr[3]}
@@ -98,54 +96,52 @@ string=`sed -n '/time integration/p' log.atmosphere.0000.out` && read -ra arr <<
 cd build/test_runs/QU20km
 string=`sed -n '/time integration/p' log.atmosphere.0000.out` && read -ra arr <<< "$string" && echo ${arr[3]}
 ```
-This command will return the total runtime in seconds, excluding I/O runtime.
-
-If the model is run using more than 10,000 cores, logs are written in `log.atmosphere.00000.out`:
-```
-string=`sed -n '/time integration/p' log.atmosphere.00000.out` && read -ra arr <<< "$string" && echo ${arr[3]}
-```
+For simulations utilizing more than 10,000 cores, the log file name is `log.atmosphere.00000.out`.
 
 ### 6. Estimation of runtime & Verification
-After obtatining model runtime for two simulations, the number of nodes (cores) with incresing number of windows (i.e., regionally refined regions) can be estimated by scaling from the runtime differences between the two simulations under the linear scaling assumption.
+
+#### 6.1. Estimating runtime
+After obtatining the runtime for both test cases, the number of nodes (cores) required for an incresing number of windows (i.e., regionally refined regions) can be estimated under a linear scaling assumption.
 ```
 cd build/
 cmake --build . --target POST_BUILD
 cd postprocess
 
 vi estimate.py
+```
+Edit `estimate.py` to input the runtime values and system configuration:
+- refRuntimeVR : runtime of VR20km-4km_N01_D700
+- refRuntimeQU : runtime of QU20km
+- nNodeUsed : the number node used to obtaion those runtime
+- nCoresPerNode : the number of cores per node
 
-# Enter the runtime information of the two simulations and the system configuration
-#   refRuntimeVR : runtime of VR20km-4km_N01_D700
-#   refRuntimeQU : runtime of QU20km
-#   nNodeUsed : the number node used to obtaion those runtime
-#   nCoresPerNode : the number of cores per node
-
-# Save and out
+Save and exit, then excute:
+```
 python estimate.py
 ```
-Estimated number of nodes (cores) will be printed out based on the information entered. Here we provide the baseline performance on Air Force HPC11 system with the GNU compiler:
+The estimated node/core requirements will be displayed. The following baseline performance is provided for reference, based on the Air Force HPC11 system with the GNU compiler:
 ```
 --------------------------------------------------------------------
-Entered runtime using 64 nodes ( 8192 cores )
+Runtime measured using 64 nodes ( 8192 cores )
  - VR20km-1km_N01_D700 = 2399.776 s
  - QU20km              = 2076.7826 s
 --------------------------------------------------------------------
-To complete the simulation within 40 minutes,
+Estimated requirements to complete 48 h forecast within 40 minutes:
 
-64 nodes ( 8192 cores ) are apporximately required for 1 windows.
-73 nodes ( 9344 cores ) are apporximately required for 2 windows.
-81 nodes ( 10368 cores ) are apporximately required for 3 windows.
-90 nodes ( 11520 cores ) are apporximately required for 4 windows.
-98 nodes ( 12544 cores ) are apporximately required for 5 windows.
-107 nodes ( 13696 cores ) are apporximately required for 6 windows.
-116 nodes ( 14848 cores ) are apporximately required for 7 windows.
-124 nodes ( 15872 cores ) are apporximately required for 8 windows.
-133 nodes ( 17024 cores ) are apporximately required for 9 windows.
-142 nodes ( 18176 cores ) are apporximately required for 10 windows.
+64 nodes ( 8192 cores ) for 1 windows.
+73 nodes ( 9344 cores ) for 2 windows.
+81 nodes ( 10368 cores ) for 3 windows.
+90 nodes ( 11520 cores ) for 4 windows.
+98 nodes ( 12544 cores ) for 5 windows.
+107 nodes ( 13696 cores ) for 6 windows.
+116 nodes ( 14848 cores ) for 7 windows.
+124 nodes ( 15872 cores ) for 8 windows.
+133 nodes ( 17024 cores ) for 9 windows.
+142 nodes ( 18176 cores ) for 10 windows.
 --------------------------------------------------------------------
 ```
-
-The specific numerical results may vary depending on the machine and compiler used. To ensure baseline accuracy, a verification dataset `verif_HPC11_GNU_VR20km-4km_N01_D700_theta_f48h.nc` is provided to compare the model outputs of the target machine with those obtained on the Air Force HPC11 system. The verification process computes the L2 error norm of the three-dimensional potential temperature after 48 forecast hours. The acceptable error threshold would be less than 1.0E-2.
+#### 6.2. Verification of baseline accuracy
+The numerical results may vary depending on the system architecture and compiler. To ensure baseline accuracy, a verification dataset `verif_HPC11_GNU_VR20km-4km_N01_D700_theta_f48h.nc` is provided to compare the model outputs of the target machine with those obtained on the Air Force HPC11 system. The verification process computes the L2 error norm of the three-dimensional potential temperature after 48 forecast hours. The acceptable error threshold is < 1.0E-2.
 ```
 cd build
 cmake --build . --target VERIFY_BUILD
