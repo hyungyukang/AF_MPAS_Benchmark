@@ -143,8 +143,6 @@ Estimated requirements to complete 48 h forecast within 40 minutes:
 #### 6.2. Verification of baseline accuracy
 The numerical results may vary depending on the system architecture and compiler. To ensure baseline accuracy, a verification dataset `verif_HPC11_GNU_VR20km-4km_N01_D700_theta_f48h.nc` is provided to compare the model outputs of the target machine with those obtained on the Air Force HPC11 system. The verification process computes the L2 error norm of the three-dimensional potential temperature after 48 forecast hours. The acceptable error threshold is < 1.0E-2.
 ```
-cd build
-cmake --build . --target VERIFY_BUILD
-cd verifications
+cd build/postprocess
 ./verify.exe
 ```
